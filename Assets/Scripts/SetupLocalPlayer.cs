@@ -12,9 +12,27 @@ public class SetupLocalPlayer : NetworkBehaviour
 	public Text _nameText;
 	public Transform _namePos;
 
+	string _textboxName = "";
+
+	[SyncVar(hook = nameof(OnChangeName))]
+	public string pName = "";
+
 	#endregion
 
 	#region MonoBehaviour Methods
+
+	void OnGUI()
+	{
+		if (isLocalPlayer)
+		{
+			_textboxName = GUI.TextField(new Rect(25, 15, 100, 25), _textboxName);
+			
+			if(GUI.Button(new Rect(130, 15, 35, 25), "Set"))
+			{
+				CmdChangeName(_textboxName);
+			}
+		}
+	}
 
 	void Start() 
 	{
@@ -39,17 +57,27 @@ public class SetupLocalPlayer : NetworkBehaviour
 	}
 	#endregion
 
-	#region Public Methods
+	#region Server Methods
 
-
+	[Command]
+	void CmdChangeName(string newName)
+	{
+		pName = newName;
+		_nameText.text = pName;
+	}
 	#endregion
 
-	#region Private Methods
+	#region Client Methods
 
 	void MakeThePlayerNameLabel()
 	{
 		GameObject canvas = GameObject.FindGameObjectWithTag("MainCanvas");
-		_nameText = Instantiate(_namePrefab,canvas.transform);
+		_nameText = Instantiate(_namePrefab, canvas.transform);
+	}
+
+	void OnChangeName(string newName)
+	{
+		_nameText.text = newName;
 	}
 	#endregion
 }
