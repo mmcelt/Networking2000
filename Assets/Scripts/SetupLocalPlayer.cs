@@ -12,13 +12,25 @@ public class SetupLocalPlayer : NetworkBehaviour
 	string textboxname = "";
 	string colourboxname = "";
 
-	[SyncVar(hook = "OnChangeName")]
+	[SyncVar(hook = nameof(OnChangeName))]
 	public string pName = "player";
 
-	[SyncVar(hook = "OnChangeColour")]
-	public string pColour = "#ffffff";
+	[SyncVar(hook = nameof(OnChangeColor))]
+	public string pColor = "#ffffff";
 
 	#region Client Methods
+
+	public override void OnStartClient()
+	{
+		base.OnStartClient();
+		Invoke(nameof(UpdateStates), 0.5f);
+	}
+
+	void UpdateStates()
+	{
+		OnChangeName(pName);
+		OnChangeColor(pColor);
+	}
 
 	void OnChangeName(string n)
 	{
@@ -26,15 +38,15 @@ public class SetupLocalPlayer : NetworkBehaviour
 		nameLabel.text = pName;
 	}
 
-	void OnChangeColour(string n)
+	void OnChangeColor(string n)
 	{
-		pColour = n;
+		pColor = n;
 		Renderer[] rends = GetComponentsInChildren<Renderer>();
 
 		foreach (Renderer r in rends)
 		{
 			if (r.gameObject.name == "BODY")
-				r.material.SetColor("_Color", ColorFromHex(pColour));
+				r.material.SetColor("_Color", ColorFromHex(pColor));
 		}
 	}
 	#endregion
@@ -49,15 +61,15 @@ public class SetupLocalPlayer : NetworkBehaviour
 	}
 
 	[Command]
-	public void CmdChangeColour(string newColour)
+	public void CmdChangeColor(string newColour)
 	{
-		pColour = newColour;
+		pColor = newColour;
 		Renderer[] rends = GetComponentsInChildren<Renderer>();
 
 		foreach (Renderer r in rends)
 		{
 			if (r.gameObject.name == "BODY")
-				r.material.SetColor("_Color", ColorFromHex(pColour));
+				r.material.SetColor("_Color", ColorFromHex(pColor));
 		}
 	}
 	#endregion
@@ -74,7 +86,7 @@ public class SetupLocalPlayer : NetworkBehaviour
 
 			colourboxname = GUI.TextField(new Rect(170, 15, 100, 25), colourboxname);
 			if (GUI.Button(new Rect(275, 15, 35, 25), "Set"))
-				CmdChangeColour(colourboxname);
+				CmdChangeColor(colourboxname);
 		}
 	}
 
