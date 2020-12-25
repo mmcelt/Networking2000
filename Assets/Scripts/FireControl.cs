@@ -32,18 +32,25 @@ public class FireControl : NetworkBehaviour
 	[Command]
 	void CmdShoot()
 	{
-		GameObject bullet = Instantiate(_bulletPrefab, _firePoint.position, _firePoint.rotation);
-		//bullet.GetComponent<Rigidbody>().AddForce(_firePoint.forward * _fireStrength);
-		bullet.GetComponent<Rigidbody>().velocity = _firePoint.forward *_fireStrength;
-
-		NetworkServer.Spawn(bullet);
-
-		Destroy(bullet, 3.0f);
+		CreateBullet();
+		RpcCreateBullet();
 	}
 	#endregion
 
-	#region Private Methods
+	#region client Methods
 
+	[ClientRpc]
+	void RpcCreateBullet()
+	{
+		if (!isServer)
+			CreateBullet();
+	}
 
+	void CreateBullet()
+	{
+		GameObject bullet = Instantiate(_bulletPrefab, _firePoint.position, _firePoint.rotation);
+		bullet.GetComponent<Rigidbody>().velocity = _firePoint.forward * _fireStrength;
+		Destroy(bullet, 3.0f);
+	}
 	#endregion
 }
