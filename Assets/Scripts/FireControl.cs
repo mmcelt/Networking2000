@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class FireControl : MonoBehaviour
+public class FireControl : NetworkBehaviour
 {
 	#region Fields
 
@@ -14,21 +15,31 @@ public class FireControl : MonoBehaviour
 
 	#region MonoBehaviour Methods
 
+	[ClientCallback]
 	void Update() 
 	{
+		if (!isLocalPlayer) return;
+
 		if (Input.GetKeyDown(KeyCode.Space))
 		{
-			GameObject bullet = Instantiate(_bulletPrefab, _firePoint.position, _firePoint.rotation);
-			bullet.GetComponent<Rigidbody>().AddForce(_firePoint.forward * _fireStrength);
-
-			Destroy(bullet, 3.0f);
+			CmdShoot();
 		}
 	}
 	#endregion
 
-	#region Public Methods
+	#region Server Methods
 
+	[Command]
+	void CmdShoot()
+	{
+		GameObject bullet = Instantiate(_bulletPrefab, _firePoint.position, _firePoint.rotation);
+		//bullet.GetComponent<Rigidbody>().AddForce(_firePoint.forward * _fireStrength);
+		bullet.GetComponent<Rigidbody>().velocity = _firePoint.forward *_fireStrength;
 
+		NetworkServer.Spawn(bullet);
+
+		Destroy(bullet, 3.0f);
+	}
 	#endregion
 
 	#region Private Methods
