@@ -9,14 +9,20 @@ public class SetupLocalPlayer : NetworkBehaviour
 	public Text namePrefab;
 	public Text nameLabel;
 	public Transform namePos;
-	string textboxname = "";
-	string colourboxname = "";
+	public Slider _healthbarPrefab;
+	public Slider _healthbar;
 
+	string _textboxName = "";
+	string _colorboxName = "";
+	
 	[SyncVar(hook = nameof(OnChangeName))]
-	public string pName = "player";
+	public string _pName = "player";
 
 	[SyncVar(hook = nameof(OnChangeColor))]
-	public string pColor = "#ffffff";
+	public string _pColor = "#ffffff";
+
+	[SyncVar(hook = nameof(OnChangeHealth))]
+	public int _healthValue = 100;
 
 	#region Client Methods
 
@@ -28,26 +34,32 @@ public class SetupLocalPlayer : NetworkBehaviour
 
 	void UpdateStates()
 	{
-		OnChangeName(pName);
-		OnChangeColor(pColor);
+		OnChangeName(_pName);
+		OnChangeColor(_pColor);
 	}
 
 	void OnChangeName(string n)
 	{
-		pName = n;
-		nameLabel.text = pName;
+		_pName = n;
+		nameLabel.text = _pName;
 	}
 
 	void OnChangeColor(string n)
 	{
-		pColor = n;
+		_pColor = n;
 		Renderer[] rends = GetComponentsInChildren<Renderer>();
 
 		foreach (Renderer r in rends)
 		{
 			if (r.gameObject.name == "BODY")
-				r.material.SetColor("_Color", ColorFromHex(pColor));
+				r.material.SetColor("_Color", ColorFromHex(_pColor));
 		}
+	}
+
+	void OnChangeHealth(int newHealth)
+	{
+		_healthValue = newHealth;
+		_healthbar.value = _healthValue;
 	}
 	#endregion
 
@@ -56,21 +68,28 @@ public class SetupLocalPlayer : NetworkBehaviour
 	[Command]
 	public void CmdChangeName(string newName)
 	{
-		pName = newName;
-		nameLabel.text = pName;
+		_pName = newName;
+		nameLabel.text = _pName;
 	}
 
 	[Command]
 	public void CmdChangeColor(string newColour)
 	{
-		pColor = newColour;
+		_pColor = newColour;
 		Renderer[] rends = GetComponentsInChildren<Renderer>();
 
 		foreach (Renderer r in rends)
 		{
 			if (r.gameObject.name == "BODY")
-				r.material.SetColor("_Color", ColorFromHex(pColor));
+				r.material.SetColor("_Color", ColorFromHex(_pColor));
 		}
+	}
+
+	[Command]
+	public void CmdChangeHealth(int amount)
+	{
+		_healthValue += amount;
+		_healthbar.value = _healthValue;
 	}
 	#endregion
 
@@ -80,13 +99,13 @@ public class SetupLocalPlayer : NetworkBehaviour
 	{
 		if (isLocalPlayer)
 		{
-			textboxname = GUI.TextField(new Rect(25, 15, 100, 25), textboxname);
+			_textboxName = GUI.TextField(new Rect(25, 15, 100, 25), _textboxName);
 			if (GUI.Button(new Rect(130, 15, 35, 25), "Set"))
-				CmdChangeName(textboxname);
+				CmdChangeName(_textboxName);
 
-			colourboxname = GUI.TextField(new Rect(170, 15, 100, 25), colourboxname);
+			_colorboxName = GUI.TextField(new Rect(170, 15, 100, 25), _colorboxName);
 			if (GUI.Button(new Rect(275, 15, 35, 25), "Set"))
-				CmdChangeColor(colourboxname);
+				CmdChangeColor(_colorboxName);
 		}
 	}
 
@@ -121,14 +140,18 @@ public class SetupLocalPlayer : NetworkBehaviour
 		}
 
 		GameObject canvas = GameObject.FindWithTag("MainCanvas");
-		nameLabel = Instantiate(namePrefab, Vector3.zero, Quaternion.identity) as Text;
-		nameLabel.transform.SetParent(canvas.transform);
+		nameLabel = Instantiate(namePrefab, canvas.transform);
+		_healthbar = Instantiate(_healthbarPrefab, canvas.transform);
+
+		CmdChangeHealth(100);
 	}
 
 	public void OnDestroy()
 	{
 		if (nameLabel != null)
 			Destroy(nameLabel.gameObject);
+		if (_healthbar != null)
+			Destroy(_healthbar.gameObject);
 	}
 
 	void Update()
@@ -144,9 +167,21 @@ public class SetupLocalPlayer : NetworkBehaviour
 			{
 				Vector3 nameLabelPos = Camera.main.WorldToScreenPoint(namePos.position);
 				nameLabel.transform.position = nameLabelPos;
+				_healthbar.transform.position = nameLabelPos + new Vector3(0, 35, 0);
 			}
 			else //otherwise draw it WAY off the screen 
+			{
 				nameLabel.transform.position = new Vector3(-1000, -1000, 0);
+				_healthbar.transform.position = new Vector3(-1000, -1000, 0);
+			}
+		}
+	}
+
+	void OnCollisionEnter(Collision other)
+	{
+		if (isLocalPlayer && other.gameObject.CompareTag("Bullet"))
+		{
+			CmdChangeHealth(-5);
 		}
 	}
 	#endregion
