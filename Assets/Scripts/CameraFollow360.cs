@@ -12,7 +12,7 @@ public class CameraFollow360 : MonoBehaviour
 	public float cameraSpeed = 10;
 	public float rotSpeed = 10;
 
-	void LateUpdate()
+	void FixedUpdate()
 	{
 		if (player)
 		{
@@ -20,11 +20,11 @@ public class CameraFollow360 : MonoBehaviour
 			Vector3 relativePos = lookPosition - transform.position;
 			Quaternion rot = Quaternion.LookRotation(relativePos);
 
-			transform.rotation = Quaternion.Slerp(this.transform.rotation, rot, Time.deltaTime * rotSpeed * 0.1f);
+			transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * rotSpeed * 0.1f);
 
 			Vector3 targetPos = player.transform.position + player.transform.up * height - player.transform.forward * distance;
 
-			this.transform.position = Vector3.Lerp(this.transform.position, targetPos, Time.deltaTime * cameraSpeed * 0.1f);
+			transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * cameraSpeed * 0.1f);
 		}
 	}
 }
