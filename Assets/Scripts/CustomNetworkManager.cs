@@ -20,13 +20,20 @@ public class CustomNetworkManager : NetworkManager
 
 	public short playerPrefabIndex;
 
+	public int selGridInt;
+	public string[] selStrings = new string[] { "Princess", "Brutius", "Jane", "Funky" };
+
 	#endregion
 
-	#region MonoBehaviour Methods
+	#region Unity Callbacks
 
-	void Start() 
+	void OnGUI()
 	{
-		
+		if (!isNetworkActive)
+		{
+			selGridInt = GUI.SelectionGrid(new Rect(Screen.width - 200, 10, 200, 50), selGridInt, selStrings, 2);
+			playerPrefabIndex = (short)(selGridInt);
+		}
 	}
 	#endregion
 
