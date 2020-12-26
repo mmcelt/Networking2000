@@ -12,6 +12,9 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 	[SyncVar(hook = nameof(OnChangeAnimation))]
 	public string _animState;
 
+	[SyncVar(hook = nameof(OnChangeTop))]
+	public int tID;
+
 	#endregion
 
 	#region MonoBehaviour Methods
@@ -25,6 +28,8 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 		{
 			GetComponent<PlayerController>().enabled = true;
 			CameraFollow360.player = gameObject.transform;
+			CharacterCustomizer.myCharacter = gameObject;
+			CmdChangeTop(0);
 		}
 		else
 		{
@@ -61,6 +66,14 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 
 		UpdateAnimationState(newState);
 	}
+
+	void OnChangeTop(int t)
+	{
+		if (isLocalPlayer) return;
+
+		tID = t;
+		transform.Find("Tops").GetComponent<Renderer>().material.mainTexture = CharacterCustomizer.GetTop(tID, name);
+	}
 	#endregion
 
 	#region Server Methods
@@ -75,6 +88,13 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 	public void CmdUpdatePlayerCharacter(int cId)
 	{
 		NetworkManager.singleton.GetComponent<CustomNetworkManager>().SwitchPlayer(this, cId);
+	}
+
+	[Command]
+	public void CmdChangeTop(int i)
+	{
+		tID = i;
+		transform.Find("Tops").GetComponent<Renderer>().material.mainTexture = CharacterCustomizer.GetTop(tID, name);
 	}
 	#endregion
 
