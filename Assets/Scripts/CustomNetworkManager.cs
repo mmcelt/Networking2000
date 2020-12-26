@@ -58,6 +58,14 @@ public class CustomNetworkManager : NetworkManager
 		playerPrefab = spawnPrefabs[msg.prefabIndex];
 		base.OnServerAddPlayer(netMsg.conn, msg.controllerID);
 	}
+
+	public void SwitchPlayer(SetupLocalHumanPlayer player, int cID)
+	{
+		GameObject newPlayer = Instantiate(spawnPrefabs[cID], player.gameObject.transform.position, player.gameObject.transform.rotation);
+		playerPrefab = spawnPrefabs[cID];
+		Destroy(player.gameObject);
+		NetworkServer.ReplacePlayerForConnection(player.connectionToClient, newPlayer, 0);
+	}
 	#endregion
 
 	#region Client Methods

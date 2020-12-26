@@ -31,6 +31,26 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 			GetComponent<PlayerController>().enabled = false;
 		}
 	}
+
+	void Update()
+	{
+		if (!isLocalPlayer) return;
+
+		int charID = -1;
+		if (Input.GetKeyDown(KeyCode.Alpha1))
+			charID = 0;
+		if (Input.GetKeyDown(KeyCode.Alpha2))
+			charID = 1;
+		if (Input.GetKeyDown(KeyCode.Alpha3))
+			charID = 2;
+		if (Input.GetKeyDown(KeyCode.Alpha4))
+			charID = 3;
+
+		if (charID == -1) return;
+
+		CmdUpdatePlayerCharacter(charID);
+	}
+
 	#endregion
 
 	#region Client Methods
@@ -49,6 +69,12 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 	public void CmdChangeAnimState(string newState)
 	{
 		UpdateAnimationState(newState);
+	}
+
+	[Command]
+	public void CmdUpdatePlayerCharacter(int cId)
+	{
+		NetworkManager.singleton.GetComponent<CustomNetworkManager>().SwitchPlayer(this, cId);
 	}
 	#endregion
 
