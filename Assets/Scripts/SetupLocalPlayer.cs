@@ -6,11 +6,16 @@ using UnityEngine.UI;
 
 public class SetupLocalPlayer : NetworkBehaviour
 {
-	public Text namePrefab;
-	public Text nameLabel;
-	public Transform namePos;
+	public Text _namePrefab;
+	public Text _nameLabel;
+	public Transform _namePos;
+
 	public Slider _healthbarPrefab;
 	public Slider _healthbar;
+
+	public GameObject _explosionPrefab;
+
+	NetworkStartPosition[] _spawnPositions;
 
 	string _textboxName = "";
 	string _colorboxName = "";
@@ -36,12 +41,13 @@ public class SetupLocalPlayer : NetworkBehaviour
 	{
 		OnChangeName(_pName);
 		OnChangeColor(_pColor);
+		OnChangeHealth(100);
 	}
 
 	void OnChangeName(string n)
 	{
 		_pName = n;
-		nameLabel.text = _pName;
+		_nameLabel.text = _pName;
 	}
 
 	void OnChangeColor(string n)
@@ -61,6 +67,17 @@ public class SetupLocalPlayer : NetworkBehaviour
 		_healthValue = newHealth;
 		_healthbar.value = _healthValue;
 	}
+
+	[ClientRpc]
+	public void RpcRespawn()
+	{
+		if (!isLocalPlayer) return;
+
+		if (_spawnPositions != null && _spawnPositions.Length > 0)
+		{
+			transform.position = _spawnPositions[Random.Range(0, _spawnPositions.Length)].transform.position;
+		}
+	}
 	#endregion
 
 	#region Server Methods
@@ -69,7 +86,7 @@ public class SetupLocalPlayer : NetworkBehaviour
 	public void CmdChangeName(string newName)
 	{
 		_pName = newName;
-		nameLabel.text = _pName;
+		_nameLabel.text = _pName;
 	}
 
 	[Command]
@@ -89,7 +106,19 @@ public class SetupLocalPlayer : NetworkBehaviour
 	public void CmdChangeHealth(int amount)
 	{
 		_healthValue += amount;
+
 		_healthbar.value = _healthValue;
+
+		if (_healthValue <= 0)
+		{
+			GameObject explosion = Instantiate(_explosionPrefab, transform.position + new Vector3(0, 4, 0), Quaternion.identity);
+			NetworkServer.Spawn(explosion);
+			Destroy(explosion, 2f);
+
+			GetComponent<Rigidbody>().velocity = Vector3.zero;
+			RpcRespawn();
+			_healthValue = 100;
+		}
 	}
 	#endregion
 
@@ -132,7 +161,7 @@ public class SetupLocalPlayer : NetworkBehaviour
 		if (isLocalPlayer)
 		{
 			GetComponent<PlayerController>().enabled = true;
-			CameraFollow360.player = this.gameObject.transform;
+			CameraFollow360.player = gameObject.transform;
 		}
 		else
 		{
@@ -140,16 +169,18 @@ public class SetupLocalPlayer : NetworkBehaviour
 		}
 
 		GameObject canvas = GameObject.FindWithTag("MainCanvas");
-		nameLabel = Instantiate(namePrefab, canvas.transform);
+
+		_nameLabel = Instantiate(_namePrefab, canvas.transform);
+
 		_healthbar = Instantiate(_healthbarPrefab, canvas.transform);
 
-		CmdChangeHealth(100);
+		_spawnPositions = FindObjectsOfType<NetworkStartPosition>();
 	}
 
 	public void OnDestroy()
 	{
-		if (nameLabel != null)
-			Destroy(nameLabel.gameObject);
+		if (_nameLabel != null)
+			Destroy(_nameLabel.gameObject);
 		if (_healthbar != null)
 			Destroy(_healthbar.gameObject);
 	}
@@ -157,7 +188,7 @@ public class SetupLocalPlayer : NetworkBehaviour
 	void Update()
 	{
 		//determine if the object is inside the camera's viewing volume
-		if (nameLabel != null)
+		if (_nameLabel != null)
 		{
 			Vector3 screenPoint = Camera.main.WorldToViewportPoint(this.transform.position);
 			bool onScreen = screenPoint.z > 0 && screenPoint.x > 0 &&
@@ -165,13 +196,13 @@ public class SetupLocalPlayer : NetworkBehaviour
 			//if it is on screen draw its label attached to is name position
 			if (onScreen)
 			{
-				Vector3 nameLabelPos = Camera.main.WorldToScreenPoint(namePos.position);
-				nameLabel.transform.position = nameLabelPos;
+				Vector3 nameLabelPos = Camera.main.WorldToScreenPoint(_namePos.position);
+				_nameLabel.transform.position = nameLabelPos;
 				_healthbar.transform.position = nameLabelPos + new Vector3(0, 35, 0);
 			}
 			else //otherwise draw it WAY off the screen 
 			{
-				nameLabel.transform.position = new Vector3(-1000, -1000, 0);
+				_nameLabel.transform.position = new Vector3(-1000, -1000, 0);
 				_healthbar.transform.position = new Vector3(-1000, -1000, 0);
 			}
 		}
@@ -181,7 +212,9 @@ public class SetupLocalPlayer : NetworkBehaviour
 	{
 		if (isLocalPlayer && other.gameObject.CompareTag("Bullet"))
 		{
-			CmdChangeHealth(-5);
+			Destroy(other.gameObject);
+
+			CmdChangeHealth(-10);
 		}
 	}
 	#endregion
