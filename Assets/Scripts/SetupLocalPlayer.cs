@@ -64,6 +64,8 @@ public class SetupLocalPlayer : NetworkBehaviour
 
 	void OnChangeHealth(int newHealth)
 	{
+		if (_healthbar == null) return;
+
 		_healthValue = newHealth;
 		_healthbar.value = _healthValue;
 	}
@@ -160,19 +162,20 @@ public class SetupLocalPlayer : NetworkBehaviour
 	{
 		if (isLocalPlayer)
 		{
-			GetComponent<PlayerController>().enabled = true;
+			GetComponent<MyPlayerController>().enabled = true;
 			CameraFollow360.player = gameObject.transform;
 		}
 		else
 		{
-			GetComponent<PlayerController>().enabled = false;
+			GetComponent<MyPlayerController>().enabled = false;
 		}
 
 		GameObject canvas = GameObject.FindWithTag("MainCanvas");
 
 		_nameLabel = Instantiate(_namePrefab, canvas.transform);
 
-		_healthbar = Instantiate(_healthbarPrefab, canvas.transform);
+		if(_healthbar!=null)
+			_healthbar = Instantiate(_healthbarPrefab, canvas.transform);
 
 		_spawnPositions = FindObjectsOfType<NetworkStartPosition>();
 	}
@@ -198,12 +201,12 @@ public class SetupLocalPlayer : NetworkBehaviour
 			{
 				Vector3 nameLabelPos = Camera.main.WorldToScreenPoint(_namePos.position);
 				_nameLabel.transform.position = nameLabelPos;
-				_healthbar.transform.position = nameLabelPos + new Vector3(0, 35, 0);
+				//_healthbar.transform.position = nameLabelPos + new Vector3(0, 35, 0);
 			}
 			else //otherwise draw it WAY off the screen 
 			{
 				_nameLabel.transform.position = new Vector3(-1000, -1000, 0);
-				_healthbar.transform.position = new Vector3(-1000, -1000, 0);
+				//_healthbar.transform.position = new Vector3(-1000, -1000, 0);
 			}
 		}
 	}

@@ -29,7 +29,7 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 
 		if (isLocalPlayer)
 		{
-			GetComponent<PlayerController>().enabled = true;
+			GetComponent<MyPlayerController>().enabled = true;
 			CameraFollow360.player = gameObject.transform;
 			CharacterCustomizer.myCharacter = gameObject;
 			transform.Find("Tops").GetComponent<Renderer>().material.mainTexture = CharacterCustomizer.GetTop(CharacterCustomizer.GetTopId(), name);
@@ -38,7 +38,7 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 		}
 		else
 		{
-			GetComponent<PlayerController>().enabled = false;
+			GetComponent<MyPlayerController>().enabled = false;
 		}
 	}
 

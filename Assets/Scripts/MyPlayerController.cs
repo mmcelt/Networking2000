@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerController : MonoBehaviour
+public class MyPlayerController: MonoBehaviour
 {
 	Rigidbody _rb;
 	Animator _anim;
@@ -26,16 +26,16 @@ public class PlayerController : MonoBehaviour
 		_rb.MoveRotation(_rb.rotation * turn);
 
 		//THIS CODE IS FOR THE ANIMATION PART OF THE COURSE ONLY!
-		if (translation != 0)
-		{
-			_anim.SetBool("Idling", false);
-			GetComponent<SetupLocalHumanPlayer>().CmdChangeAnimState("run");
-		}
-		else
-		{
-			_anim.SetBool("Idling", true);
-			GetComponent<SetupLocalHumanPlayer>().CmdChangeAnimState("idle");
-		}
+		//if (translation != 0)
+		//{
+		//	_anim.SetBool("Idling", false);
+		//	GetComponent<SetupLocalHumanPlayer>().CmdChangeAnimState("run");
+		//}
+		//else
+		//{
+		//	_anim.SetBool("Idling", true);
+		//	GetComponent<SetupLocalHumanPlayer>().CmdChangeAnimState("idle");
+		//}
 	}
 
 	void Update()
