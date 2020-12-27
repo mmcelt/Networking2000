@@ -158,6 +158,16 @@ public class SetupLocalPlayer : NetworkBehaviour
 		return new Color32(r, g, b, a);
 	}
 
+	void Awake()
+	{
+		GameObject canvas = GameObject.FindWithTag("MainCanvas");
+
+		_nameLabel = Instantiate(_namePrefab, canvas.transform);
+
+		if (_healthbar != null)
+			_healthbar = Instantiate(_healthbarPrefab, canvas.transform);
+	}
+
 	void Start()
 	{
 		if (isLocalPlayer)
@@ -169,13 +179,6 @@ public class SetupLocalPlayer : NetworkBehaviour
 		{
 			GetComponent<MyPlayerController>().enabled = false;
 		}
-
-		GameObject canvas = GameObject.FindWithTag("MainCanvas");
-
-		_nameLabel = Instantiate(_namePrefab, canvas.transform);
-
-		if(_healthbar!=null)
-			_healthbar = Instantiate(_healthbarPrefab, canvas.transform);
 
 		_spawnPositions = FindObjectsOfType<NetworkStartPosition>();
 	}
