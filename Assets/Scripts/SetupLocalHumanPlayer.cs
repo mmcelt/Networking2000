@@ -24,12 +24,17 @@ public class SetupLocalHumanPlayer: NetworkBehaviour
 		_anim = GetComponent<Animator>();
 		_anim.SetBool("Idling", true);
 
+		if (!isLocalPlayer)
+			transform.Find("Tops").GetComponent<Renderer>().material.mainTexture = CharacterCustomizer.GetTop(tID, name);
+
 		if (isLocalPlayer)
 		{
 			GetComponent<PlayerController>().enabled = true;
 			CameraFollow360.player = gameObject.transform;
 			CharacterCustomizer.myCharacter = gameObject;
-			CmdChangeTop(0);
+			transform.Find("Tops").GetComponent<Renderer>().material.mainTexture = CharacterCustomizer.GetTop(CharacterCustomizer.GetTopId(), name);
+
+			CmdChangeTop(CharacterCustomizer.GetTopId());
 		}
 		else
 		{

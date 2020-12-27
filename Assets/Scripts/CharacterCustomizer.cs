@@ -10,6 +10,7 @@ public class CharacterCustomizer : MonoBehaviour
 	public static GameObject myCharacter;
 	public Texture[] JaneTops;
 	public Texture[] BrutiusTops;
+	public int currentTop;
 
 	#endregion
 
@@ -19,23 +20,28 @@ public class CharacterCustomizer : MonoBehaviour
 	{
 		CC = this;
 	}
-	
-	void Update() 
-	{
-		
-	}
 	#endregion
 
 	#region Public Methods
 
-	public void ChangeTopTexture(int i)
+	public void ChangeTopTexture(int i)	//called from the Dropdown
 	{
+		Debug.Log(i);
+		Debug.Log(myCharacter.name);
+
 		if (myCharacter.name.Contains("Jane"))
+		{
 			myCharacter.transform.Find("Tops").GetComponent<Renderer>().material.mainTexture = JaneTops[i];
-		else if(myCharacter.name.Contains("Brutius"))
+
+			Debug.Log(JaneTops[i].name);
+		}
+		else if (myCharacter.name.Contains("Brutius"))
+		{
 			myCharacter.transform.Find("Tops").GetComponent<Renderer>().material.mainTexture = BrutiusTops[i];
+		}
 
 		myCharacter.GetComponent<SetupLocalHumanPlayer>().CmdChangeTop(i);
+		CC.currentTop = i;
 	}
 
 	public static Texture GetTop(int i,string name)
@@ -46,6 +52,11 @@ public class CharacterCustomizer : MonoBehaviour
 			return (CC.BrutiusTops[i]);
 
 		return null;
+	}
+
+	public static int GetTopId()
+	{
+		return CC.currentTop;
 	}
 	#endregion
 
