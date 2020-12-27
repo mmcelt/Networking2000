@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-
 public class SetupLocalPlayer : NetworkBehaviour
 {
 	public Text _namePrefab;
